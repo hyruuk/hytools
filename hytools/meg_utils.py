@@ -62,7 +62,7 @@ def inscapesMEG_PP(fname, DATA_FOLDER, SAVE_FOLDER):
     raw.save(SAVE_FOLDER + fname + '_preprocessed.fif.gz', overwrite=True)
     time.sleep(30)
     filename = SAVE_FOLDER + fname + '_log.html'
-    !jupyter nbconvert inscapesMEG_preproc.ipynb --output $filename
+    #!jupyter nbconvert inscapesMEG_preproc.ipynb --output $filename
     clear_output()
 
 def segment_data(raw, new_sf=240., epochs_length=5.):
