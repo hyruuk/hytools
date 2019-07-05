@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="hytools",
-    version="0.0.5",
+    version="0.0.6",
     description="Tools for MEG and behavioural analysis",
     url="http://github.com/hyruuk/hytools",
     author="Yann Harel",

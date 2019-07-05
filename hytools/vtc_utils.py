@@ -37,7 +37,7 @@ def in_out_zone(VTC):
     for i, val in enumerate(VTC):
         if val < VTC_med:
             INzone.append(i)
-        if val => VTC_med:
+        if val >= VTC_med:
             OUTzone.append(i)
     INzone = np.asarray(INzone)
     OUTzone = np.asarray(OUTzone)
