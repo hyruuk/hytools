@@ -6,11 +6,11 @@ from scipy import signal
 import numpy as np
 
 
-### VTC computation 
+### VTC computation
 
 def interp_RT(RT):
     ### Interpolate missing reaction times using the average of proximal values.
-    # Note that this technique behaves poorly when two 0 are following each other 
+    # Note that this technique behaves poorly when two 0 are following each other
     for i in range(len(RT)):
         if RT[i] == 0:
             try:
@@ -30,14 +30,14 @@ def compute_VTC(RT_interp, filt=True, filt_order=3, filt_cutoff=0.05):
     return VTC
 
 def in_out_zone(VTC):
-    ### Collects the indices of IN/OUT zone trials     
+    ### Collects the indices of IN/OUT zone trials
     INzone = []
     OUTzone = []
     VTC_med = np.median(VTC)
     for i, val in enumerate(VTC):
-        if val > VTC_med:
-            INzone.append(i)
         if val < VTC_med:
+            INzone.append(i)
+        if val > VTC_med:
             OUTzone.append(i)
     INzone = np.asarray(INzone)
     OUTzone = np.asarray(OUTzone)
@@ -46,7 +46,7 @@ def in_out_zone(VTC):
 def find_bounds(array):
     ### Create a list of tuples, each containing the first and last values of every ordered sequences
     # contained in a 1D array
-    
+
     def find_jumps(array):
         ### Finds the jumps in an array containing ordered sequences
         jumps = []
@@ -57,7 +57,7 @@ def find_bounds(array):
             except:
                 break
         return jumps
-    
+
     jumps = find_jumps(array)
     bounds = []
     for i, jump in enumerate(jumps):
