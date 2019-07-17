@@ -116,6 +116,34 @@ def get_ch_pos(epochs):
     ch_xy = new_ref_pos[:,0:2] # retain only the X and Y coordinates (0:2 veut dire "de 0 à 2", donc 0 et 1 car on compte pas 2)
     return ch_xy
 
+
+def computePSD(signal, pageDuration):
+    fs = len(signal)/pageDuration
+    try:
+        f,p = welch(signal, fs=fs, window='hamming', nperseg=int(len(signal)/6), noverlap=0, nfft=None)
+    except ValueError:
+        print(len(signal), pageDuration, int(len(signal)/6), fs)
+    return f,p
+
+def computePowerBands(f, amp):
+    M_px=np.empty([7])
+    M_px[0]=np.mean(amp[(f>=2)*(f <= 4)]) #delta
+    M_px[1]=np.mean(amp[(f>=5)*(f <= 7)]) #theta
+    M_px[2]=np.mean(amp[(f>=8)*(f <= 13)]) #alpha
+    M_px[3]=np.mean(amp[(f>=8)*(f <= 13)]) #sigma
+    M_px[4]=np.mean(amp[(f>=13)*(f <= 30)]) #beta
+    M_px[5]=np.mean(amp[(f>=30)*(f <= 50)]) #low_gamma
+    M_px[6]=np.mean(amp[(f>=60)*(f <= 90)]) #high_gamma
+    return M_px
+
+def computeRelPowerBands(f, amp):
+    totPow = np.sum(amp)
+    return (np.sum(amp[(f>=0.5)*(f <= 4.5)])/totPow,
+            np.sum(amp[(f>=4.5)*(f <= 8.5)])/totPow,
+            np.sum(amp[(f>=8.5)*(f <= 11.5)])/totPow,
+            np.sum(amp[(f>=11.5)*(f <= 15.5)])/totPow,
+            np.sum(amp[(f>=15.5)*(f <= 32.5)])/totPow )
+
 def compute_PSD(epochs, sf, epochs_length, f=None):
     if f == None:
         f = [ [4, 8], [8, 12], [12, 20], [20, 30], [30, 60], [60, 90], [90, 120] ]
@@ -126,10 +154,25 @@ def compute_PSD(epochs, sf, epochs_length, f=None):
     psds = objet_PSD.get(data)[0] # Ici on calcule la PSD !
     return psds
 
-def custom_plot_topo(toplot, ch_xy, fig_name, cmap='magma'):
-    # Ptite fonction pour faire le topoplot automatiquement
-    #fig = plt.figure() # On créé une figure vide
-    fig,_ = mne.viz.plot_topomap(data=toplot, pos=ch_xy, cmap=cmap, vmin=-1, vmax=1) # Et on la remplit avec une topomap de MNE qui affiche nos données
-    plt.colorbar(fig, shrink=0.5) # Sans oublier la colorbar !
-    plt.title(fig_name)
-    return fig
+
+
+def array_topoplot(toplot, ch_xy, showtitle=False, titles=None, savefig=False, figpath=None, vmin=-1, vmax=1):
+    #create fig
+    fig, ax = plt.subplots(1,len(toplot), figsize=(20,10))
+    #create a topomap for each data array
+    for i, data in enumerate(toplot):
+        image,_ = mne.viz.plot_topomap(data=data, pos=ch_xy, cmap='magma', vmin=vmin, vmax=vmax, axes=ax[i], show=False)
+        #option for title
+        if showtitle == True:
+            ax[i].set_title(titles[i], fontdict={'fontsize': 20, 'fontweight': 'heavy'})
+    #add a colorbar at the end of the line (weird trick from https://www.martinos.org/mne/stable/auto_tutorials/stats-sensor-space/plot_stats_spatio_temporal_cluster_sensors.html#sphx-glr-auto-tutorials-stats-sensor-space-plot-stats-spatio-temporal-cluster-sensors-py)
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    divider = make_axes_locatable(ax[-1])
+    ax_colorbar = divider.append_axes('right', size='5%', pad=0.05)
+    plt.colorbar(image, cax=ax_colorbar)
+    ax_colorbar.tick_params(labelsize=14)
+    #save plot if specified
+    if savefig == True:
+        plt.savefig(figpath, dpi=300)
+    plt.show()
+    return fig, ax
