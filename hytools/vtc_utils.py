@@ -34,7 +34,7 @@ def in_out_zone(VTC, lobound = None, hibound = None):
     # lobound and hibound are values between 0 and 1 representing quantiles
     INzone = []
     OUTzone = []
-    if lobound == None && hibound == None:
+    if lobound == None and hibound == None:
         VTC_med = np.median(VTC)
         for i, val in enumerate(VTC):
             if val < VTC_med:
@@ -85,7 +85,7 @@ def get_VTC_from_file(filepath, lobound = None, hibound = None):
     RT_array= np.asarray(df_response.loc[:,4])
     RT_interp = interp_RT(RT_array)
     VTC = compute_VTC(RT_interp)
-    if lobound == None && hibound == None:
+    if lobound == None and hibound == None:
         INzone, OUTzone = in_out_zone(VTC)
     else:
         INzone, OUTzone = in_out_zone(VTC, lobound=lobound, hibound=hibound)
