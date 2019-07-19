@@ -29,16 +29,26 @@ def compute_VTC(RT_interp, filt=True, filt_order=3, filt_cutoff=0.05):
     VTC = VTC_filtered
     return VTC
 
-def in_out_zone(VTC):
+def in_out_zone(VTC, lobound = None, hibound = None):
     ### Collects the indices of IN/OUT zone trials
+    # lobound and hibound are values between 0 and 1 representing quantiles
     INzone = []
     OUTzone = []
-    VTC_med = np.median(VTC)
-    for i, val in enumerate(VTC):
-        if val < VTC_med:
-            INzone.append(i)
-        if val >= VTC_med:
-            OUTzone.append(i)
+    if lobound == None && hibound == None:
+        VTC_med = np.median(VTC)
+        for i, val in enumerate(VTC):
+            if val < VTC_med:
+                INzone.append(i)
+            if val >= VTC_med:
+                OUTzone.append(i)
+    else:
+        low = np.quantile(VTC, lobound)
+        high = np.quantile(VTC, hibound)
+        for i, val in enumerate(VTC):
+            if val < low:
+                INzone.append(i)
+            if val >= high:
+                OUTzone.append(i)
     INzone = np.asarray(INzone)
     OUTzone = np.asarray(OUTzone)
     return INzone, OUTzone
@@ -69,13 +79,16 @@ def find_bounds(array):
             bounds.append(tuple([array[jump+1], array[-1]]))
     return bounds
 
-def get_VTC_from_file(filepath):
+def get_VTC_from_file(filepath, lobound = None, hibound = None):
     data = loadmat(filepath)
     df_response = pd.DataFrame(data['response'])
     RT_array= np.asarray(df_response.loc[:,4])
     RT_interp = interp_RT(RT_array)
     VTC = compute_VTC(RT_interp)
-    INzone, OUTzone = in_out_zone(VTC)
+    if lobound == None && hibound == None:
+        INzone, OUTzone = in_out_zone(VTC)
+    else:
+        INzone, OUTzone = in_out_zone(VTC, lobound=lobound, hibound=hibound)
     INbounds = find_bounds(INzone)
     OUTbounds = find_bounds(OUTzone)
     return VTC, INbounds, OUTbounds, INzone, OUTzone
