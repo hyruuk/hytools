@@ -95,8 +95,9 @@ def get_VTC_from_file(filepath, lobound = None, hibound = None):
 
 def plot_VTC(VTC, figpath=None, save=False):
     x = np.arange(0, len(VTC))
-    OUT_mask = np.ma.masked_where(VTC >= np.median(VTC), VTC)
-    IN_mask = np.ma.masked_where(VTC < np.median(VTC), VTC)
+    VTC_med = np.median(VTC)
+    OUT_mask = np.ma.masked_where(VTC >= VTC_med, VTC)
+    IN_mask = np.ma.masked_where(VTC < VTC_med, VTC)
     lines = plt.plot(x, OUT_mask, x, IN_mask)
     fig = plt.plot()
     plt.setp(lines[0], linewidth=2)
